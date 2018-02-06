@@ -3,9 +3,92 @@
   <head>
     <title>{{ title }}</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
   </head>
   <body>
-    <h1>{{ title }}</h1>
-    <p>Welcome to {{ title }}</p>
+    <div id="chartContainer" style="height: 300px; width: 100%;">
+   	</div>
   </body>
+
+
+<script>
+	
+// request data and use a Promise to get access to the data
+
+function getData(url){
+	return new Promise(function(resolve, reject){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", url, true);
+		xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+		      	resolve(xhttp.response);
+		       
+		    }
+		};
+		
+		xhttp.send();
+
+	});
+	
+}; 
+
+var promise = getData("http://localhost:3000/scrape");
+
+promise.then(function(response){
+	//console.log(response)
+	var dataPoints = JSON.parse(response);
+	
+	var myDataPoints = [];
+	for(i=0; i < dataPoints.length; i++) {
+		myDataPoints.push(dataPoints[i]);	
+	} 
+
+	//console.log(dataPoints);
+	//console.log(myDataPoints);
+
+	var chart = new CanvasJS.Chart("chartContainer",
+	    {
+	      	animationEnabled: true,
+	      	backgroundColor: "#2b303b",
+	      	title: {
+	      	fontSize: 45,
+	      	fontColor: "grey",
+	        text: "Market Interest Rate Expectations"
+	     	},
+	     	axisX: {
+	     		labelFontColor: "grey",
+				title: "CME Futures Month",
+				titleFontSize: 24,
+				titleFontColor: "grey"
+			},
+	      	axisY: {
+	      		labelFontColor: "grey",
+				title: "Implied Rate %",
+				titleFontSize: 24,
+				titleFontColor: "grey"
+			},
+	      	data: [
+
+	      	{
+	      	type: "column",
+	      	color: "#549eff",
+	        dataPoints: myDataPoints
+	      	}
+
+	      	]
+	});
+
+	chart.render();
+
+});
+
+</script>
+
 </html>
+
+
+
+
+
+
+

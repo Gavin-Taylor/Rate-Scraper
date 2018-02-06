@@ -2,10 +2,13 @@ var express = require('express')
 var router = express.Router()
 var cheerio = require('cheerio')
 var request = require('request')
+var fs = require('fs')
 
 var url = "http://www.cmegroup.com/trading/interest-rates/stir/eurodollar.html"
 
-var abc = {}
+var abc = []
+
+
 var futureMonths = []
 var futureNum = []
 
@@ -23,14 +26,17 @@ router.get('/', function(req, res, next) {
 				futureMonths.push(months)
 				})
 
+				//console.log(futureMonths.length)
+
 				// select last traded prices from table by searching ids that end with 'last', iterate and push to a var
 
 				$("[id$=last]").each(function(){
-				var frontMonthNumber = $(this).text()
+				var frontMonthNumber = 100-(Number($(this).text()))
 				futureNum.push(frontMonthNumber)
 				})
 
-				
+				console.log(futureNum)
+
 				//One of many attempts to select id that ends in last. Dont know why not working..
 				//var frontMonthNumber = $('id:contains("GEH8")').eq(1)
 				//var frontMonth = frontMonthNumber.text()
@@ -58,9 +64,19 @@ router.get('/', function(req, res, next) {
 
 			// combine the months array with coresponding data array in key/value relationship
 
-			for (var i = 0; i < futureMonths.length; i++)
-				abc[futureMonths[i]] = futureNum[i]
-    
+			for (var i = 0; i < futureMonths.length; i++) {
+				//abc[ futureMonths[i] = futureNum[i] ]
+    			abc.push({
+    				label: futureMonths[i],
+    				y: futureNum[i]
+    			})
+
+				//console.log(abc)
+			}
+
+			abc = JSON.stringify(abc)
+			fs.writeFileSync('data.json', abc)
+			//abc.fs.createWriteStream('data.json')
 
 			res.send(abc)	
 
@@ -69,3 +85,9 @@ router.get('/', function(req, res, next) {
 })
 
 module.exports = router
+
+// fed rate data from last FOMC meeting..
+// https://www.federalreserve.gov/monetarypolicy/fomcminutes20171213ep.htm
+// or..
+// https://www.federalreserve.gov/monetarypolicy/fomcminutes20171213epa.htm#fig1
+
